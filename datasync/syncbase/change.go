@@ -42,6 +42,13 @@ func NewChangeBytes(key string, value []byte, rev int64, changeType datasync.Op)
 	}
 }
 
+func NewChangeLazy(key string, value datasync.LazyValue, rev int64, changeType datasync.Op) *Change {
+	return &Change{
+		changeType: changeType,
+		KeyVal:     &KeyVal{key, value, rev},
+	}
+}
+
 // GetChangeType returns type of the change.
 func (kv *Change) GetChangeType() datasync.Op {
 	return kv.changeType

@@ -97,6 +97,11 @@ func (adapter *Registry) Watch(resyncName string, changeChan chan datasync.Chang
 	return &WatchDataReg{resyncName, adapter}, nil
 }
 
+type UpdateItem interface {
+	datasync.LazyValue
+	GetLabels() map[string]string
+}
+
 // PropagateChanges fills registered channels with the data.
 func (adapter *Registry) PropagateChanges(ctx context.Context, txData map[string]datasync.ChangeValue) error {
 	var events []func(done chan error)
@@ -124,7 +129,10 @@ func (adapter *Registry) PropagateChanges(ctx context.Context, txData map[string
 				} else {
 					_, prev, curRev = adapter.lastRev.Put(key, val)
 				}
-
+				if item, ok := val.(UpdateItem); ok {
+					logrus.DefaultLogger().Warnf("WOLOLO SYNCBASE updateItem: %+v", item)
+					logrus.DefaultLogger().Warnf("WOLOLO SYNCBASE updateItem labels: %+v", item.GetLabels())
+				}
 				changes = append(changes, &ChangeResp{
 					Key:        key,
 					ChangeType: val.GetChangeType(),
